@@ -3,37 +3,57 @@ MAX_ROWS = 26
 COL_LABELS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
               'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
+save_root = 'save/'
+history_root = 'history/'
 
-class Game:
+
+class Mode:
     PvP = 'PvP'
     PvC = 'PvC'
 
-    def __init__(self, player1, player2, mode=Game.PvP, currentTurn=0):
-        self.player1 = Player()
-        if mode == GameMode.PvP:
-            self.player2 = Bot()
-        else:
-            self.player2 = Player()
+class Game:
+    def __init__(self, player1, player2, mode, currentTurn=0):
+        self.player1 = player1
+        self.player2 = player2
         self.turn = currentTurn
         self.mode = mode
         self.board = Board(MAX_COLS, MAX_ROWS)
 
     def save(self, filename):
-        with open('save/'+filename, 'w') as f:
+        with open(save_root+filename, 'w') as f:
             f.write(self.map)
 
     @staticmethod
     def load(filename):
         pass
 
-    def start(start):
+    def start(self):
+        while not self.board.isEndGame():
+            self.board.display()
+
+            # Check the turn and set turn for nextplayer
+            if self.turn == 0:
+                nextplayer = self.player1
+                mark = 'X'
+                self.turn = 1
+            else:
+                nextplayer = self.player2
+                mark = 'O'
+                self.turn = 0
+    
+            move = nextplayer.getMove()
+            while not self.board.isValidOnBoard(move):
+                print("not a valid move!")
+                move = nextplayer.getMove()
+            self.board.update(move, mark)
+
         pass
     
 
 class Board:
     def __init__(self, cols, rows):
-        self.cols = min(MAX_COLS, 25)
-        self.rows = min(MAX_ROWS, 25)
+        self.cols = min(MAX_COLS, cols)
+        self.rows = min(MAX_ROWS, rows)
         self.data = self.__initData(self.cols, self.rows)
 
     def __initData(self, cols, rows):
@@ -41,7 +61,7 @@ class Board:
         for i in range(rows):
             data.append([])
             for j in range(cols):
-                data[i].append(0)
+                data[i].append(".")
         return data
 
     
@@ -52,7 +72,7 @@ class Board:
         """
         try:
             move = move.lower()
-            row, col = int(ord(move[0]) - ord('a')), int(move[1])
+            row, col = int(ord(move[0]) - ord('a')), int(move[1:])
         except:
             return False
         return row, col
@@ -67,14 +87,30 @@ class Board:
             print(move + 'is not a valid move !')
             return False
 
-    def update(self, row, col, val):
-        """ update data[row][col] = val """
-        self.data[row][col] = val
+    def isEndGame(self):
+        """ code here """
+        return False
+
+    def update(self, move, mark):
+        def __update(row, col, val):
+            """ update data[row][col] = val """
+            self.data[row][col-1] = val
+        row, col = self.__convertCoord(move)
+        __update(row, col, mark)
+
+        
 
 
     def display(self):
-        for row in data:
-            print("\n".join([str(e) for e in row]))    
+        """ print the board """
+        print(" ", end="")
+        [print('{:3d}'.format(i), end="") for i in range(1, 27)]
+        print("")
+        for i in range(len(self.data)):
+            print( '{0:3s}'.format(chr(ord('a') + i)), end="")
+            print("  ".join(self.data[i]), end="\n")
+    
+    
 
 
 
@@ -90,7 +126,7 @@ class Player:
         self.name = name
 
     def getMove(self):
-        move = input("{} turn. Enter the move: ".format(self.name) + Player.promptHelp)
+        move = input("{} turn. Enter the move: ".format(self.name))
         return move
     
 
