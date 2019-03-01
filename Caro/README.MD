@@ -21,8 +21,8 @@ PvP
 
 `gameplay.py`: contains 4 class
 
-`-       Game`: game instance, when you load a game, create a new game, you literally create an instance of this class 
-              `newgame = Game(player1, player2,...)`
+`-       Game`: game instance, when you load a game, or create a new game, you literally create an instance of this class 
+`               +  newgame = Game(player1, player2,...)`
 
 `-       Board`: the class for drawing the *board*. It can help to check
                 + Is the player move is a valid move?
